@@ -26,7 +26,7 @@
 		// subscribe to events
 		window.on("render-level", this.dispatch);
 	},
-	dispatch(event) {
+	async dispatch(event) {
 		let APP = witness,
 			Self = APP.edit,
 			xNode,
@@ -58,7 +58,7 @@
 
 				// if in lobby, render template level
 				if (Game.grid.levelId === "0.1") {
-					return APP.dispatch({ type: "render-level", arg: "template" });
+					return await APP.dispatch({ type: "render-level", arg: "template" });
 				}
 				// init edit view, if not already initiated
 				if (!value) Self.dispatch({ type: "init-edit-view" });
@@ -152,7 +152,7 @@
 				Self.els.puzzle = Self.els.level.find("> .puzzle");
 				// add endpoint compass
 				if (!Self.els.level.find(".ends-compass").length) {
-					window.render({
+					await window.render({
 						template: "endpoint-compass",
 						append: Self.els.level,
 					});
@@ -199,7 +199,7 @@
 
 				// add endpoint compass
 				if (!Self.els.level.find(".ends-compass").length) {
-					window.render({
+					await window.render({
 						template: "endpoint-compass",
 						append: Self.els.level,
 					});

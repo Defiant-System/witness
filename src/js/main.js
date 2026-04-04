@@ -44,22 +44,14 @@ const witness = {
 			.filter(i => typeof this[i].init === "function")
 			.map(i => this[i].init(this));
 
-		// get saved progression, if any
-		this.state = window.settings.getItem("progression") || DefaultState;
-
-		if (this.state.progression.length) {
-			// go to last saved state
-			this.progression.dispatch({ type: "apply-saved-state" });
-		} else {
-			// start view / first "level"
-			Game.dispatch({ type: "render-level", arg: "0.1" });
-		}
+		// init settings
+		this.dispatch({ type: "init-settings" });
 
 		// DEV-ONLY-START
 		Test.init(this);
 		// DEV-ONLY-END
 	},
-	dispatch(event) {
+	async dispatch(event) {
 		let Self = witness,
 			value,
 			el;
@@ -72,7 +64,7 @@ const witness = {
 				// pause background worker
 				Bg.dispatch({ type: "dispose", kill: true });
 				// save game state
-				value = Self.progression.dispatch({ type: "serialize-progress" });
+				value = await Self.progression.dispatch({ type: "serialize-progress" });
 				window.settings.setItem("progression", { progression: value });
 				break;
 			case "window.focus":
@@ -88,6 +80,18 @@ const witness = {
 				Game.dispatch(event);
 				break;
 			// custom events
+			case "init-settings":
+				// get saved progression, if any
+				Self.state = await window.settings.getItem("progression") || DefaultState;
+
+				if (Self.state.progression.length) {
+					// go to last saved state
+					setTimeout(() => Self.progression.dispatch({ type: "apply-saved-state" }), 60);
+				} else {
+					// start view / first "level"
+					Game.dispatch({ type: "render-level", arg: "0.1" });
+				}
+				break;
 			case "show-view":
 				window.find("content").data({ show: event.arg });
 				break;

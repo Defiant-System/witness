@@ -5,7 +5,7 @@ class Grid {
 		this.navigationSelector = new NavigationSelector(this);
 	}
 
-	render(id) {
+	async render(id) {
 		// save value
 		this.levelId = id;
 		// out with the old
@@ -26,15 +26,16 @@ class Grid {
 		this.generateStorage(xLevel);
 
 		// html output
-		let nextEl = window.render({
-				match,
-				template: "level-puzzle",
-				append: window.find(".game-view"),
-			}),
-			appearFn = () => {
-				// appear animation
-				nextEl.cssSequence("appear", "animationend", el => el.addClass("active").removeClass("appear"));
-			};
+		let nextEl = await window.render({
+			match,
+			template: "level-puzzle",
+			append: window.find(".game-view"),
+		});
+
+		let appearFn = () => {
+			// appear animation
+			nextEl.cssSequence("appear", "animationend", el => el.addClass("active").removeClass("appear"));
+		};
 
 		if (id === "1.0") setTimeout(appearFn, 500);
 		else appearFn();
@@ -52,7 +53,7 @@ class Grid {
 		window.emit("render-level", { id });
 	}
 
-	renderClone(xClone) {
+	async renderClone(xClone) {
 		let xGrid = xClone.selectSingleNode("./grid");
 		// values from xLevel to UI contants
 		this.syncConstants(xGrid);
@@ -63,7 +64,7 @@ class Grid {
 
 		// html output
 		let match = `//Data/Level[@clone="${xClone.getAttribute("clone")}"]`;
-		let cloneEl = window.render({ match, template: "level-puzzle", vdom: true }).find(".level");
+		let cloneEl = await window.render({ match, template: "level-puzzle", vdom: true }).find(".level");
 		cloneEl.removeClass("appear").addClass("active");
 		this.el.parent().replace(cloneEl[0]);
 
@@ -135,7 +136,7 @@ class Grid {
 		this.snake.render();
 	}
 
-	finishSnake() {
+	async finishSnake() {
 		let APP = witness,
 			fadeOutSnake = (sequence="fade-out") => {
 				// UI update
@@ -226,7 +227,7 @@ class Grid {
 		// start fire flies
 		Particles.start(this, this.snake.snakeEl, colors[0], fnNext);
 		// progression power up
-		APP.progression.dispatch({ type: "progress-power-up" });
+		await APP.progression.dispatch({ type: "progress-power-up" });
 		// for secondary snake
 		if (this.getSymmetry()) {
 			Particles.start(this, this.snake.secondarySnakeEl, colors[1]);

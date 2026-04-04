@@ -15,7 +15,7 @@
 		// subscribe to event
 		window.on("render-level", this.dispatch);
 	},
-	dispatch(event) {
+	async dispatch(event) {
 		let APP = witness,
 			Self = APP.progression,
 			xNode,
@@ -115,7 +115,7 @@
 				}
 
 				// render progression nav
-				window.render({
+				await window.render({
 					template: "game-progression",
 					match: "//Data/Progression",
 					target: Self.els.el,
@@ -132,7 +132,7 @@
 				break;
 			case "progress-power-up":
 				// check if progressed
-				value = Self.dispatch({ type: "serialize-progress" });
+				value = await Self.dispatch({ type: "serialize-progress" });
 				if (value.join() === APP.state.progression.join()) return;
 				// update game state
 				APP.state.progression = value;

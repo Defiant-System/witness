@@ -9,7 +9,7 @@ let Game = {
 		// populate contextmenu
 		this.dispatch({ type: "populate-contextmenu" });
 	},
-	dispatch(event) {
+	async dispatch(event) {
 		let APP = witness,
 			Self = Game,
 			data,
@@ -69,7 +69,7 @@ let Game = {
 				}
 				if (Self.grid.levelId === "0.1") {
 					APP.state.progression = [-1];
-					APP.progression.dispatch({ type: "apply-saved-state", noJump: true });
+					await APP.progression.dispatch({ type: "apply-saved-state", noJump: true });
 				}
 				Self.level.index = Self.level.list.indexOf(Self.grid.levelId) + 1;
 				if (Self.level.index > Self.level.list.length - 1) Self.level.index = 0;
