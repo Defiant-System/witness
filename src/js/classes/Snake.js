@@ -48,11 +48,18 @@ class Snake {
 		this.lastUpdateTime = null;
 		this.mouseX = data.mX ? data.mX : 0;
 		this.mouseY = data.mY ? data.mY : 0;
+		this.rawMouseX = this.mouseX;
+		this.rawMouseY = this.mouseY;
 		this.frameTime = new ElapsedTime();
 		this.mouseHistoryX = [];
 		this.mouseHistoryY = [];
 		this.targetingMouse = false;
 		this.snapToGrid = false;
+		// Pointer-lock filter: ease toward raw deltas, ignore micro-jitter.
+		this.MOUSE_SMOOTH = 1.15;
+		this.MOUSE_DEADZONE = 2.5;
+		this.MOUSE_HISTORY = 5;
+		this.MOUSE_GAIN = 1.5;
 	}
 
 	setTargetingMouse(targetingMouse, snapToGrid) {
@@ -70,8 +77,34 @@ class Snake {
 	// }
 
 	setMouseDiff(mouseX, mouseY) {
-		this.mouseX += mouseX;
-		this.mouseY += mouseY;
+		this.rawMouseX += mouseX;
+		this.rawMouseY += mouseY;
+	}
+
+	// Low-pass the virtual cursor toward accumulated pointer-lock motion.
+	// Returns true when the snake should step this frame.
+	filterMouse() {
+		let dx = this.rawMouseX - this.mouseX,
+			dy = this.rawMouseY - this.mouseY,
+			dist = Math.hypot(dx, dy);
+		if (dist <= this.MOUSE_DEADZONE) return false;
+
+		let excess = dist - this.MOUSE_DEADZONE,
+			step = excess * this.MOUSE_SMOOTH;
+		this.mouseX += (dx / dist) * step;
+		this.mouseY += (dy / dist) * step;
+		return true;
+	}
+
+	pointerDelta() {
+		let n = this.mouseHistoryX.length;
+		if (n < 2) return { mdx: 0, mdy: 0 };
+
+		let mdx = (this.mouseHistoryX[n - 1] - this.mouseHistoryX[0]) / n * this.MOUSE_GAIN,
+			mdy = (this.mouseHistoryY[n - 1] - this.mouseHistoryY[0]) / n * this.MOUSE_GAIN;
+		if (Math.abs(mdx) * 5 < Math.abs(mdy)) mdx = 0;
+		if (Math.abs(mdy) * 5 < Math.abs(mdx)) mdy = 0;
+		return { mdx, mdy };
 	}
 
 	calcMouseOnGrid() {
@@ -97,14 +130,13 @@ class Snake {
 		} else {
 			this.mouseHistoryX.push(this.mouseX);
 			this.mouseHistoryY.push(this.mouseY);
-			if (this.mouseHistoryX.length > 3) {
+			if (this.mouseHistoryX.length > this.MOUSE_HISTORY) {
 				this.mouseHistoryX.shift();
 				this.mouseHistoryY.shift();
 			}
 
 			// should ideally separate max distance into vertical and horizontal.
-			let mdx = (this.mouseHistoryX[this.mouseHistoryX.length - 1] - this.mouseHistoryX[0]) / this.mouseHistoryX.length * 2.5;
-			let mdy = (this.mouseHistoryY[this.mouseHistoryY.length - 1] - this.mouseHistoryY[0]) / this.mouseHistoryY.length * 2.5;
+			let { mdx, mdy } = this.pointerDelta();
 			let move = Math.max(Math.abs(mdx), Math.abs(mdy));
 			maxMovement = move;  // Keep it easy...
 		}
@@ -140,11 +172,7 @@ class Snake {
 				preferHorizontal: Math.abs(dx) >= Math.abs(dy)
 			};
 		} else {
-			let mdx = (this.mouseHistoryX[this.mouseHistoryX.length - 1] - this.mouseHistoryX[0]) / this.mouseHistoryX.length * 2.5;
-			let mdy = (this.mouseHistoryY[this.mouseHistoryY.length - 1] - this.mouseHistoryY[0]) / this.mouseHistoryY.length * 2.5;
-			if (Math.abs(mdx) * 5 < Math.abs(mdy)) mdx = 0;
-			if (Math.abs(mdy) * 5 < Math.abs(mdx)) mdy = 0;
-
+			let { mdx, mdy } = this.pointerDelta();
 			params = {
 				di: Math.sign(mdx),
 				dj: Math.sign(mdy),

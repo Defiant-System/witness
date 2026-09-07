@@ -1,1 +1,602 @@
-let Anim={init(r){},dispatch(r){let a=Anim,e;switch(r.type){case"start":a.cvs=r.canvas;a.ctx=a.cvs.getContext("2d");a.dispatch({type:"create-scene"});a.paused=false;a.draw();break;case"pause":a.paused=true;break;case"resume":if(a.paused&&a.ctx){a.paused=false;a.draw()}break;case"create-scene":a.boxes=[...Array(13)].map(r=>({x:Utils.random(0,a.cvs.width+100)-50|0,y:Utils.random(0,a.cvs.height-70)+35|0,d:Utils.random(.1,.75),w:Utils.random(35,80)|0,r:Utils.random(0,Math.PI)}));a.time=0;a.cx=a.cvs.width>>1;a.cy=a.cvs.height>>1;a.simplex=new SimplexNoise;break}},update(r){r.boxes.map(a=>{a.y-=a.d;if(a.y+a.w<-30){a.y=r.cvs.height+a.w*2;a.w=Utils.random(35,80)|0;a.x=Utils.random(0,r.cvs.width-30)+35|0;a.d=Utils.random(.1,.75)}a.r-=.005})},draw(){let r=Anim,a=r.cvs,e=r.ctx,v=(r,a,v)=>{let t=r+v*90;let i=a+v*60;e.save();e.translate(t+v*140,i+v*100);e.fillRect(0,0,2,2);e.fill();e.restore()};a.width=a.width;e.fillStyle=`#ffffff44`;r.boxes.map(r=>{e.save();e.translate(r.x,r.y);e.rotate(r.r);e.fillRect(-r.w>>1,-r.w>>1,r.w,r.w);e.restore()});let t=r.time;let i=r.time;let s=150;e.save();e.translate(r.cx,r.cy);for(let a=-s;a<=s;a+=10){i+=.01;let l=t;for(let t=-s;t<=s;t+=10){l+=.03;e.fillStyle=`#ffffffaa`;v(t,a,r.simplex.noise2D(l,i))}}e.restore();if(!r.paused){r.time+=5e-4;r.update(r);requestAnimationFrame(r.draw)}}};Anim.init();self.onmessage=r=>Anim.dispatch(r.data);let Utils={random(r,a){return Math.random()*(a-r)+r},calculateDistance(r,a,e,v){let t=r-e,i=a-v;return Math.sqrt(t**2+i**2)}};let SimplexNoise=function(){"use strict";var r=.5*(Math.sqrt(3)-1);var a=(3-Math.sqrt(3))/6;var e=1/3;var v=1/6;var t=(Math.sqrt(5)-1)/4;var i=(5-Math.sqrt(5))/20;function s(r){var a;if(typeof r=="function"){a=r}else if(r){a=f(r)}else{a=Math.random}this.p=l(a);this.perm=new Uint8Array(512);this.permMod12=new Uint8Array(512);for(var e=0;e<512;e++){this.perm[e]=this.p[e&255];this.permMod12[e]=this.perm[e]%12}}s.prototype={grad3:new Float32Array([1,1,0,-1,1,0,1,-1,0,-1,-1,0,1,0,1,-1,0,1,1,0,-1,-1,0,-1,0,1,1,0,-1,1,0,1,-1,0,-1,-1]),grad4:new Float32Array([0,1,1,1,0,1,1,-1,0,1,-1,1,0,1,-1,-1,0,-1,1,1,0,-1,1,-1,0,-1,-1,1,0,-1,-1,-1,1,0,1,1,1,0,1,-1,1,0,-1,1,1,0,-1,-1,-1,0,1,1,-1,0,1,-1,-1,0,-1,1,-1,0,-1,-1,1,1,0,1,1,1,0,-1,1,-1,0,1,1,-1,0,-1,-1,1,0,1,-1,1,0,-1,-1,-1,0,1,-1,-1,0,-1,1,1,1,0,1,1,-1,0,1,-1,1,0,1,-1,-1,0,-1,1,1,0,-1,1,-1,0,-1,-1,1,0,-1,-1,-1,0]),noise2D:function(e,v){var t=this.permMod12;var i=this.perm;var s=this.grad3;var l=0;var f=0;var n=0;var o=(e+v)*r;var h=Math.floor(e+o);var c=Math.floor(v+o);var d=(h+c)*a;var m=h-d;var u=c-d;var p=e-m;var w=v-u;var M,y;if(p>w){M=1;y=0}else{M=0;y=1}var x=p-M+a;var g=w-y+a;var A=p-1+2*a;var U=w-1+2*a;var b=h&255;var q=c&255;var D=.5-p*p-w*w;if(D>=0){var S=t[b+i[q]]*3;D*=D;l=D*D*(s[S]*p+s[S+1]*w)}var k=.5-x*x-g*g;if(k>=0){var F=t[b+M+i[q+y]]*3;k*=k;f=k*k*(s[F]*x+s[F+1]*g)}var C=.5-A*A-U*U;if(C>=0){var N=t[b+1+i[q+1]]*3;C*=C;n=C*C*(s[N]*A+s[N+1]*U)}return 70*(l+f+n)},noise3D:function(r,a,t){var i=this.permMod12;var s=this.perm;var l=this.grad3;var f,n,o,h;var c=(r+a+t)*e;var d=Math.floor(r+c);var m=Math.floor(a+c);var u=Math.floor(t+c);var p=(d+m+u)*v;var w=d-p;var M=m-p;var y=u-p;var x=r-w;var g=a-M;var A=t-y;var U,b,q;var D,S,k;if(x>=g){if(g>=A){U=1;b=0;q=0;D=1;S=1;k=0}else if(x>=A){U=1;b=0;q=0;D=1;S=0;k=1}else{U=0;b=0;q=1;D=1;S=0;k=1}}else{if(g<A){U=0;b=0;q=1;D=0;S=1;k=1}else if(x<A){U=0;b=1;q=0;D=0;S=1;k=1}else{U=0;b=1;q=0;D=1;S=1;k=0}}var F=x-U+v;var C=g-b+v;var N=A-q+v;var P=x-D+2*v;var R=g-S+2*v;var I=A-k+2*v;var T=x-1+3*v;var _=g-1+3*v;var j=A-1+3*v;var z=d&255;var B=m&255;var E=u&255;var G=.6-x*x-g*g-A*A;if(G<0)f=0;else{var H=i[z+s[B+s[E]]]*3;G*=G;f=G*G*(l[H]*x+l[H+1]*g+l[H+2]*A)}var J=.6-F*F-C*C-N*N;if(J<0)n=0;else{var K=i[z+U+s[B+b+s[E+q]]]*3;J*=J;n=J*J*(l[K]*F+l[K+1]*C+l[K+2]*N)}var L=.6-P*P-R*R-I*I;if(L<0)o=0;else{var O=i[z+D+s[B+S+s[E+k]]]*3;L*=L;o=L*L*(l[O]*P+l[O+1]*R+l[O+2]*I)}var Q=.6-T*T-_*_-j*j;if(Q<0)h=0;else{var V=i[z+1+s[B+1+s[E+1]]]*3;Q*=Q;h=Q*Q*(l[V]*T+l[V+1]*_+l[V+2]*j)}return 32*(f+n+o+h)},noise4D:function(r,a,e,v){var s=this.perm;var l=this.grad4;var f,n,o,h,c;var d=(r+a+e+v)*t;var m=Math.floor(r+d);var u=Math.floor(a+d);var p=Math.floor(e+d);var w=Math.floor(v+d);var M=(m+u+p+w)*i;var y=m-M;var x=u-M;var g=p-M;var A=w-M;var U=r-y;var b=a-x;var q=e-g;var D=v-A;var S=0;var k=0;var F=0;var C=0;if(U>b)S++;else k++;if(U>q)S++;else F++;if(U>D)S++;else C++;if(b>q)k++;else F++;if(b>D)k++;else C++;if(q>D)F++;else C++;var N,P,R,I;var T,_,j,z;var B,E,G,H;N=S>=3?1:0;P=k>=3?1:0;R=F>=3?1:0;I=C>=3?1:0;T=S>=2?1:0;_=k>=2?1:0;j=F>=2?1:0;z=C>=2?1:0;B=S>=1?1:0;E=k>=1?1:0;G=F>=1?1:0;H=C>=1?1:0;var J=U-N+i;var K=b-P+i;var L=q-R+i;var O=D-I+i;var Q=U-T+2*i;var V=b-_+2*i;var W=q-j+2*i;var X=D-z+2*i;var Y=U-B+3*i;var Z=b-E+3*i;var rr=q-G+3*i;var ar=D-H+3*i;var er=U-1+4*i;var vr=b-1+4*i;var tr=q-1+4*i;var ir=D-1+4*i;var sr=m&255;var lr=u&255;var fr=p&255;var nr=w&255;var or=.6-U*U-b*b-q*q-D*D;if(or<0)f=0;else{var hr=s[sr+s[lr+s[fr+s[nr]]]]%32*4;or*=or;f=or*or*(l[hr]*U+l[hr+1]*b+l[hr+2]*q+l[hr+3]*D)}var cr=.6-J*J-K*K-L*L-O*O;if(cr<0)n=0;else{var dr=s[sr+N+s[lr+P+s[fr+R+s[nr+I]]]]%32*4;cr*=cr;n=cr*cr*(l[dr]*J+l[dr+1]*K+l[dr+2]*L+l[dr+3]*O)}var mr=.6-Q*Q-V*V-W*W-X*X;if(mr<0)o=0;else{var ur=s[sr+T+s[lr+_+s[fr+j+s[nr+z]]]]%32*4;mr*=mr;o=mr*mr*(l[ur]*Q+l[ur+1]*V+l[ur+2]*W+l[ur+3]*X)}var pr=.6-Y*Y-Z*Z-rr*rr-ar*ar;if(pr<0)h=0;else{var wr=s[sr+B+s[lr+E+s[fr+G+s[nr+H]]]]%32*4;pr*=pr;h=pr*pr*(l[wr]*Y+l[wr+1]*Z+l[wr+2]*rr+l[wr+3]*ar)}var Mr=.6-er*er-vr*vr-tr*tr-ir*ir;if(Mr<0)c=0;else{var yr=s[sr+1+s[lr+1+s[fr+1+s[nr+1]]]]%32*4;Mr*=Mr;c=Mr*Mr*(l[yr]*er+l[yr+1]*vr+l[yr+2]*tr+l[yr+3]*ir)}return 27*(f+n+o+h+c)}};function l(r){var a;var e=new Uint8Array(256);for(a=0;a<256;a++){e[a]=a}for(a=0;a<255;a++){var v=a+~~(r()*(256-a));var t=e[a];e[a]=e[v];e[v]=t}return e}s._buildPermutationTable=l;function f(){var r=0;var a=0;var e=0;var v=1;var t=n();r=t(" ");a=t(" ");e=t(" ");for(var i=0;i<arguments.length;i++){r-=t(arguments[i]);if(r<0){r+=1}a-=t(arguments[i]);if(a<0){a+=1}e-=t(arguments[i]);if(e<0){e+=1}}t=null;return function(){var t=2091639*r+v*2.3283064365386963e-10;r=a;a=e;return e=t-(v=t|0)}}function n(){var r=4022871197;return function(a){a=a.toString();for(var e=0;e<a.length;e++){r+=a.charCodeAt(e);var v=.02519603282416938*r;r=v>>>0;v-=r;v*=r;r=v>>>0;v-=r;r+=v*4294967296}return(r>>>0)*2.3283064365386963e-10}}return s}();
+let Anim = {
+	init(canvas) {
+		// setTimeout(() => { this.paused = true }, 300);
+	},
+	dispatch(event) {
+		let Self = Anim,
+			value;
+		switch (event.type) {
+			case "start":
+				Self.cvs = event.canvas;
+				Self.ctx = Self.cvs.getContext("2d");
+				Self.dispatch({ type: "create-scene" });
+				Self.paused = false;
+				Self.draw();
+				break;
+			case "pause":
+				Self.paused = true;
+				break;
+			case "resume":
+				if (Self.paused && Self.ctx) {
+					Self.paused = false;
+					Self.draw();
+				}
+				break;
+			case "create-scene":
+				// boxes
+				Self.boxes = [...Array(13)].map(b => ({
+					x: Utils.random(0, Self.cvs.width + 100) - 50 | 0,
+					y: Utils.random(0, Self.cvs.height - 70) + 35 | 0,
+					d: Utils.random(.1, .75), // speed
+					w: Utils.random(35, 80) | 0,
+					r: Utils.random(0, Math.PI),
+				}));
+
+				// for the dots
+				Self.time = 0;
+				Self.cx = Self.cvs.width >> 1;
+				Self.cy = Self.cvs.height >> 1;
+				Self.simplex = new SimplexNoise();
+				// console.log( Self.boxes );
+				break;
+		}
+	},
+	update(Self) {
+		// boxes
+		Self.boxes.map(b => {
+			// move left
+			b.y -= b.d;
+			if (b.y + b.w < -30) {
+				// reset box
+				b.y = Self.cvs.height + (b.w * 2);
+				b.w = Utils.random(35, 80) | 0;
+				b.x = Utils.random(0, Self.cvs.width - 30) + 35 | 0;
+				b.d = Utils.random(.1, .75);
+			}
+			// rotate
+			b.r -= .005;
+		});
+	},
+	draw() {
+		let Self = Anim,
+			cvs = Self.cvs,
+			ctx = Self.ctx,
+			drawPoint = (x, y, noiseFactor) => {
+				let startX = x + noiseFactor * 90;
+				let startY = y + noiseFactor * 60;
+				ctx.save();
+				ctx.translate(startX + noiseFactor * 140, startY + noiseFactor * 100);
+				ctx.fillRect(0, 0, 2, 2);
+				ctx.fill();
+				ctx.restore();
+			};
+		// clear react
+		cvs.width = cvs.width;
+
+		// ctx.globalCompositeOperation = "lighter";
+		ctx.fillStyle = `#ffffff44`;
+		Self.boxes.map(b => {
+			ctx.save();
+			ctx.translate(b.x, b.y);
+			ctx.rotate(b.r);
+			ctx.fillRect(-b.w >> 1, -b.w >> 1, b.w, b.w);
+			ctx.restore();
+		});
+
+
+		let xstart = Self.time;
+		let ynoise = Self.time;
+		let points = 150;
+
+		ctx.save();
+		ctx.translate(Self.cx, Self.cy);
+		for (let y = -points; y <= points; y += 10) {
+			ynoise += 0.01;
+			let xnoise = xstart;
+
+			for (let x = -points; x <= points; x += 10) {
+				xnoise += 0.03;
+				ctx.fillStyle = `#ffffffaa`;
+				// ctx.fillStyle = `hsl(${(time + x * .2) % 360}, 60%, 50%, .7)`;
+				drawPoint(x, y, Self.simplex.noise2D(xnoise, ynoise));
+			}
+		}
+		ctx.restore();
+
+		// next tick
+		if (!Self.paused) {
+			Self.time += 0.0005;
+			Self.update(Self);
+			requestAnimationFrame(Self.draw);
+		}
+	}
+};
+
+// auto call init
+Anim.init();
+
+// forward message / event
+self.onmessage = event => Anim.dispatch(event.data);
+
+
+
+// simple utils
+let Utils = {
+	// get a random number within a range
+	random(min, max) {
+		return Math.random() * ( max - min ) + min;
+	},
+	// calculate the distance between two points
+	calculateDistance(p1x, p1y, p2x, p2y) {
+		let xDistance = p1x - p2x,
+			yDistance = p1y - p2y;
+		return Math.sqrt((xDistance ** 2) + (yDistance ** 2));
+	}
+};
+
+
+
+/*
+ * A fast javascript implementation of simplex noise by Jonas Wagner
+
+Based on a speed-improved simplex noise algorithm for 2D, 3D and 4D in Java.
+Which is based on example code by Stefan Gustavson (stegu@itn.liu.se).
+With Optimisations by Peter Eastman (peastman@drizzle.stanford.edu).
+Better rank ordering method by Stefan Gustavson in 2012.
+
+
+ Copyright (c) 2018 Jonas Wagner
+
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+
+ The above copyright notice and this permission notice shall be included in all
+ copies or substantial portions of the Software.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ SOFTWARE.
+ */
+let SimplexNoise = (function() {
+	"use strict";
+
+	var F2 = 0.5 * (Math.sqrt(3.0) - 1.0);
+	var G2 = (3.0 - Math.sqrt(3.0)) / 6.0;
+	var F3 = 1.0 / 3.0;
+	var G3 = 1.0 / 6.0;
+	var F4 = (Math.sqrt(5.0) - 1.0) / 4.0;
+	var G4 = (5.0 - Math.sqrt(5.0)) / 20.0;
+
+	function SimplexNoise(randomOrSeed) {
+		var random;
+		if (typeof randomOrSeed == "function") {
+			random = randomOrSeed;
+		}
+		else if (randomOrSeed) {
+			random = alea(randomOrSeed);
+		} else {
+			random = Math.random;
+		}
+		this.p = buildPermutationTable(random);
+		this.perm = new Uint8Array(512);
+		this.permMod12 = new Uint8Array(512);
+		for (var i = 0; i < 512; i++) {
+			this.perm[i] = this.p[i & 255];
+			this.permMod12[i] = this.perm[i] % 12;
+		}
+
+	}
+	SimplexNoise.prototype = {
+		grad3: new Float32Array([1, 1, 0,
+			-1, 1, 0,
+			1, -1, 0,
+
+			-1, -1, 0,
+			1, 0, 1,
+			-1, 0, 1,
+
+			1, 0, -1,
+			-1, 0, -1,
+			0, 1, 1,
+
+			0, -1, 1,
+			0, 1, -1,
+			0, -1, -1]),
+		grad4: new Float32Array([0, 1, 1, 1, 0, 1, 1, -1, 0, 1, -1, 1, 0, 1, -1, -1,
+			0, -1, 1, 1, 0, -1, 1, -1, 0, -1, -1, 1, 0, -1, -1, -1,
+			1, 0, 1, 1, 1, 0, 1, -1, 1, 0, -1, 1, 1, 0, -1, -1,
+			-1, 0, 1, 1, -1, 0, 1, -1, -1, 0, -1, 1, -1, 0, -1, -1,
+			1, 1, 0, 1, 1, 1, 0, -1, 1, -1, 0, 1, 1, -1, 0, -1,
+			-1, 1, 0, 1, -1, 1, 0, -1, -1, -1, 0, 1, -1, -1, 0, -1,
+			1, 1, 1, 0, 1, 1, -1, 0, 1, -1, 1, 0, 1, -1, -1, 0,
+			-1, 1, 1, 0, -1, 1, -1, 0, -1, -1, 1, 0, -1, -1, -1, 0]),
+		noise2D: function(xin, yin) {
+			var permMod12 = this.permMod12;
+			var perm = this.perm;
+			var grad3 = this.grad3;
+			var n0 = 0; // Noise contributions from the three corners
+			var n1 = 0;
+			var n2 = 0;
+			// Skew the input space to determine which simplex cell we're in
+			var s = (xin + yin) * F2; // Hairy factor for 2D
+			var i = Math.floor(xin + s);
+			var j = Math.floor(yin + s);
+			var t = (i + j) * G2;
+			var X0 = i - t; // Unskew the cell origin back to (x,y) space
+			var Y0 = j - t;
+			var x0 = xin - X0; // The x,y distances from the cell origin
+			var y0 = yin - Y0;
+			// For the 2D case, the simplex shape is an equilateral triangle.
+			// Determine which simplex we are in.
+			var i1, j1; // Offsets for second (middle) corner of simplex in (i,j) coords
+			if (x0 > y0) {
+				i1 = 1;
+				j1 = 0;
+			} // lower triangle, XY order: (0,0)->(1,0)->(1,1)
+			else {
+				i1 = 0;
+				j1 = 1;
+			} // upper triangle, YX order: (0,0)->(0,1)->(1,1)
+			// A step of (1,0) in (i,j) means a step of (1-c,-c) in (x,y), and
+			// a step of (0,1) in (i,j) means a step of (-c,1-c) in (x,y), where
+			// c = (3-sqrt(3))/6
+			var x1 = x0 - i1 + G2; // Offsets for middle corner in (x,y) unskewed coords
+			var y1 = y0 - j1 + G2;
+			var x2 = x0 - 1.0 + 2.0 * G2; // Offsets for last corner in (x,y) unskewed coords
+			var y2 = y0 - 1.0 + 2.0 * G2;
+			// Work out the hashed gradient indices of the three simplex corners
+			var ii = i & 255;
+			var jj = j & 255;
+			// Calculate the contribution from the three corners
+			var t0 = 0.5 - x0 * x0 - y0 * y0;
+			if (t0 >= 0) {
+				var gi0 = permMod12[ii + perm[jj]] * 3;
+				t0 *= t0;
+				n0 = t0 * t0 * (grad3[gi0] * x0 + grad3[gi0 + 1] * y0); // (x,y) of grad3 used for 2D gradient
+			}
+			var t1 = 0.5 - x1 * x1 - y1 * y1;
+			if (t1 >= 0) {
+				var gi1 = permMod12[ii + i1 + perm[jj + j1]] * 3;
+				t1 *= t1;
+				n1 = t1 * t1 * (grad3[gi1] * x1 + grad3[gi1 + 1] * y1);
+			}
+			var t2 = 0.5 - x2 * x2 - y2 * y2;
+			if (t2 >= 0) {
+				var gi2 = permMod12[ii + 1 + perm[jj + 1]] * 3;
+				t2 *= t2;
+				n2 = t2 * t2 * (grad3[gi2] * x2 + grad3[gi2 + 1] * y2);
+			}
+			// Add contributions from each corner to get the final noise value.
+			// The result is scaled to return values in the interval [-1,1].
+			return 70.0 * (n0 + n1 + n2);
+		},
+		// 3D simplex noise
+		noise3D: function(xin, yin, zin) {
+			var permMod12 = this.permMod12;
+			var perm = this.perm;
+			var grad3 = this.grad3;
+			var n0, n1, n2, n3; // Noise contributions from the four corners
+			// Skew the input space to determine which simplex cell we're in
+			var s = (xin + yin + zin) * F3; // Very nice and simple skew factor for 3D
+			var i = Math.floor(xin + s);
+			var j = Math.floor(yin + s);
+			var k = Math.floor(zin + s);
+			var t = (i + j + k) * G3;
+			var X0 = i - t; // Unskew the cell origin back to (x,y,z) space
+			var Y0 = j - t;
+			var Z0 = k - t;
+			var x0 = xin - X0; // The x,y,z distances from the cell origin
+			var y0 = yin - Y0;
+			var z0 = zin - Z0;
+			// For the 3D case, the simplex shape is a slightly irregular tetrahedron.
+			// Determine which simplex we are in.
+			var i1, j1, k1; // Offsets for second corner of simplex in (i,j,k) coords
+			var i2, j2, k2; // Offsets for third corner of simplex in (i,j,k) coords
+			if (x0 >= y0) {
+				if (y0 >= z0) {
+					i1 = 1;
+					j1 = 0;
+					k1 = 0;
+					i2 = 1;
+					j2 = 1;
+					k2 = 0;
+				} // X Y Z order
+				else if (x0 >= z0) {
+					i1 = 1;
+					j1 = 0;
+					k1 = 0;
+					i2 = 1;
+					j2 = 0;
+					k2 = 1;
+				} // X Z Y order
+				else {
+					i1 = 0;
+					j1 = 0;
+					k1 = 1;
+					i2 = 1;
+					j2 = 0;
+					k2 = 1;
+				} // Z X Y order
+			}
+			else { // x0<y0
+				if (y0 < z0) {
+					i1 = 0;
+					j1 = 0;
+					k1 = 1;
+					i2 = 0;
+					j2 = 1;
+					k2 = 1;
+				} // Z Y X order
+				else if (x0 < z0) {
+					i1 = 0;
+					j1 = 1;
+					k1 = 0;
+					i2 = 0;
+					j2 = 1;
+					k2 = 1;
+				} // Y Z X order
+				else {
+					i1 = 0;
+					j1 = 1;
+					k1 = 0;
+					i2 = 1;
+					j2 = 1;
+					k2 = 0;
+				} // Y X Z order
+			}
+			// A step of (1,0,0) in (i,j,k) means a step of (1-c,-c,-c) in (x,y,z),
+			// a step of (0,1,0) in (i,j,k) means a step of (-c,1-c,-c) in (x,y,z), and
+			// a step of (0,0,1) in (i,j,k) means a step of (-c,-c,1-c) in (x,y,z), where
+			// c = 1/6.
+			var x1 = x0 - i1 + G3; // Offsets for second corner in (x,y,z) coords
+			var y1 = y0 - j1 + G3;
+			var z1 = z0 - k1 + G3;
+			var x2 = x0 - i2 + 2.0 * G3; // Offsets for third corner in (x,y,z) coords
+			var y2 = y0 - j2 + 2.0 * G3;
+			var z2 = z0 - k2 + 2.0 * G3;
+			var x3 = x0 - 1.0 + 3.0 * G3; // Offsets for last corner in (x,y,z) coords
+			var y3 = y0 - 1.0 + 3.0 * G3;
+			var z3 = z0 - 1.0 + 3.0 * G3;
+			// Work out the hashed gradient indices of the four simplex corners
+			var ii = i & 255;
+			var jj = j & 255;
+			var kk = k & 255;
+			// Calculate the contribution from the four corners
+			var t0 = 0.6 - x0 * x0 - y0 * y0 - z0 * z0;
+			if (t0 < 0) n0 = 0.0;
+			else {
+				var gi0 = permMod12[ii + perm[jj + perm[kk]]] * 3;
+				t0 *= t0;
+				n0 = t0 * t0 * (grad3[gi0] * x0 + grad3[gi0 + 1] * y0 + grad3[gi0 + 2] * z0);
+			}
+			var t1 = 0.6 - x1 * x1 - y1 * y1 - z1 * z1;
+			if (t1 < 0) n1 = 0.0;
+			else {
+				var gi1 = permMod12[ii + i1 + perm[jj + j1 + perm[kk + k1]]] * 3;
+				t1 *= t1;
+				n1 = t1 * t1 * (grad3[gi1] * x1 + grad3[gi1 + 1] * y1 + grad3[gi1 + 2] * z1);
+			}
+			var t2 = 0.6 - x2 * x2 - y2 * y2 - z2 * z2;
+			if (t2 < 0) n2 = 0.0;
+			else {
+				var gi2 = permMod12[ii + i2 + perm[jj + j2 + perm[kk + k2]]] * 3;
+				t2 *= t2;
+				n2 = t2 * t2 * (grad3[gi2] * x2 + grad3[gi2 + 1] * y2 + grad3[gi2 + 2] * z2);
+			}
+			var t3 = 0.6 - x3 * x3 - y3 * y3 - z3 * z3;
+			if (t3 < 0) n3 = 0.0;
+			else {
+				var gi3 = permMod12[ii + 1 + perm[jj + 1 + perm[kk + 1]]] * 3;
+				t3 *= t3;
+				n3 = t3 * t3 * (grad3[gi3] * x3 + grad3[gi3 + 1] * y3 + grad3[gi3 + 2] * z3);
+			}
+			// Add contributions from each corner to get the final noise value.
+			// The result is scaled to stay just inside [-1,1]
+			return 32.0 * (n0 + n1 + n2 + n3);
+		},
+		// 4D simplex noise, better simplex rank ordering method 2012-03-09
+		noise4D: function(x, y, z, w) {
+			var perm = this.perm;
+			var grad4 = this.grad4;
+
+			var n0, n1, n2, n3, n4; // Noise contributions from the five corners
+			// Skew the (x,y,z,w) space to determine which cell of 24 simplices we're in
+			var s = (x + y + z + w) * F4; // Factor for 4D skewing
+			var i = Math.floor(x + s);
+			var j = Math.floor(y + s);
+			var k = Math.floor(z + s);
+			var l = Math.floor(w + s);
+			var t = (i + j + k + l) * G4; // Factor for 4D unskewing
+			var X0 = i - t; // Unskew the cell origin back to (x,y,z,w) space
+			var Y0 = j - t;
+			var Z0 = k - t;
+			var W0 = l - t;
+			var x0 = x - X0; // The x,y,z,w distances from the cell origin
+			var y0 = y - Y0;
+			var z0 = z - Z0;
+			var w0 = w - W0;
+			// For the 4D case, the simplex is a 4D shape I won't even try to describe.
+			// To find out which of the 24 possible simplices we're in, we need to
+			// determine the magnitude ordering of x0, y0, z0 and w0.
+			// Six pair-wise comparisons are performed between each possible pair
+			// of the four coordinates, and the results are used to rank the numbers.
+			var rankx = 0;
+			var ranky = 0;
+			var rankz = 0;
+			var rankw = 0;
+			if (x0 > y0) rankx++;
+			else ranky++;
+			if (x0 > z0) rankx++;
+			else rankz++;
+			if (x0 > w0) rankx++;
+			else rankw++;
+			if (y0 > z0) ranky++;
+			else rankz++;
+			if (y0 > w0) ranky++;
+			else rankw++;
+			if (z0 > w0) rankz++;
+			else rankw++;
+			var i1, j1, k1, l1; // The integer offsets for the second simplex corner
+			var i2, j2, k2, l2; // The integer offsets for the third simplex corner
+			var i3, j3, k3, l3; // The integer offsets for the fourth simplex corner
+			// simplex[c] is a 4-vector with the numbers 0, 1, 2 and 3 in some order.
+			// Many values of c will never occur, since e.g. x>y>z>w makes x<z, y<w and x<w
+			// impossible. Only the 24 indices which have non-zero entries make any sense.
+			// We use a thresholding to set the coordinates in turn from the largest magnitude.
+			// Rank 3 denotes the largest coordinate.
+			i1 = rankx >= 3 ? 1 : 0;
+			j1 = ranky >= 3 ? 1 : 0;
+			k1 = rankz >= 3 ? 1 : 0;
+			l1 = rankw >= 3 ? 1 : 0;
+			// Rank 2 denotes the second largest coordinate.
+			i2 = rankx >= 2 ? 1 : 0;
+			j2 = ranky >= 2 ? 1 : 0;
+			k2 = rankz >= 2 ? 1 : 0;
+			l2 = rankw >= 2 ? 1 : 0;
+			// Rank 1 denotes the second smallest coordinate.
+			i3 = rankx >= 1 ? 1 : 0;
+			j3 = ranky >= 1 ? 1 : 0;
+			k3 = rankz >= 1 ? 1 : 0;
+			l3 = rankw >= 1 ? 1 : 0;
+			// The fifth corner has all coordinate offsets = 1, so no need to compute that.
+			var x1 = x0 - i1 + G4; // Offsets for second corner in (x,y,z,w) coords
+			var y1 = y0 - j1 + G4;
+			var z1 = z0 - k1 + G4;
+			var w1 = w0 - l1 + G4;
+			var x2 = x0 - i2 + 2.0 * G4; // Offsets for third corner in (x,y,z,w) coords
+			var y2 = y0 - j2 + 2.0 * G4;
+			var z2 = z0 - k2 + 2.0 * G4;
+			var w2 = w0 - l2 + 2.0 * G4;
+			var x3 = x0 - i3 + 3.0 * G4; // Offsets for fourth corner in (x,y,z,w) coords
+			var y3 = y0 - j3 + 3.0 * G4;
+			var z3 = z0 - k3 + 3.0 * G4;
+			var w3 = w0 - l3 + 3.0 * G4;
+			var x4 = x0 - 1.0 + 4.0 * G4; // Offsets for last corner in (x,y,z,w) coords
+			var y4 = y0 - 1.0 + 4.0 * G4;
+			var z4 = z0 - 1.0 + 4.0 * G4;
+			var w4 = w0 - 1.0 + 4.0 * G4;
+			// Work out the hashed gradient indices of the five simplex corners
+			var ii = i & 255;
+			var jj = j & 255;
+			var kk = k & 255;
+			var ll = l & 255;
+			// Calculate the contribution from the five corners
+			var t0 = 0.6 - x0 * x0 - y0 * y0 - z0 * z0 - w0 * w0;
+			if (t0 < 0) n0 = 0.0;
+			else {
+				var gi0 = (perm[ii + perm[jj + perm[kk + perm[ll]]]] % 32) * 4;
+				t0 *= t0;
+				n0 = t0 * t0 * (grad4[gi0] * x0 + grad4[gi0 + 1] * y0 + grad4[gi0 + 2] * z0 + grad4[gi0 + 3] * w0);
+			}
+			var t1 = 0.6 - x1 * x1 - y1 * y1 - z1 * z1 - w1 * w1;
+			if (t1 < 0) n1 = 0.0;
+			else {
+				var gi1 = (perm[ii + i1 + perm[jj + j1 + perm[kk + k1 + perm[ll + l1]]]] % 32) * 4;
+				t1 *= t1;
+				n1 = t1 * t1 * (grad4[gi1] * x1 + grad4[gi1 + 1] * y1 + grad4[gi1 + 2] * z1 + grad4[gi1 + 3] * w1);
+			}
+			var t2 = 0.6 - x2 * x2 - y2 * y2 - z2 * z2 - w2 * w2;
+			if (t2 < 0) n2 = 0.0;
+			else {
+				var gi2 = (perm[ii + i2 + perm[jj + j2 + perm[kk + k2 + perm[ll + l2]]]] % 32) * 4;
+				t2 *= t2;
+				n2 = t2 * t2 * (grad4[gi2] * x2 + grad4[gi2 + 1] * y2 + grad4[gi2 + 2] * z2 + grad4[gi2 + 3] * w2);
+			}
+			var t3 = 0.6 - x3 * x3 - y3 * y3 - z3 * z3 - w3 * w3;
+			if (t3 < 0) n3 = 0.0;
+			else {
+				var gi3 = (perm[ii + i3 + perm[jj + j3 + perm[kk + k3 + perm[ll + l3]]]] % 32) * 4;
+				t3 *= t3;
+				n3 = t3 * t3 * (grad4[gi3] * x3 + grad4[gi3 + 1] * y3 + grad4[gi3 + 2] * z3 + grad4[gi3 + 3] * w3);
+			}
+			var t4 = 0.6 - x4 * x4 - y4 * y4 - z4 * z4 - w4 * w4;
+			if (t4 < 0) n4 = 0.0;
+			else {
+				var gi4 = (perm[ii + 1 + perm[jj + 1 + perm[kk + 1 + perm[ll + 1]]]] % 32) * 4;
+				t4 *= t4;
+				n4 = t4 * t4 * (grad4[gi4] * x4 + grad4[gi4 + 1] * y4 + grad4[gi4 + 2] * z4 + grad4[gi4 + 3] * w4);
+			}
+			// Sum up and scale the result to cover the range [-1,1]
+			return 27.0 * (n0 + n1 + n2 + n3 + n4);
+		}
+	};
+
+	function buildPermutationTable(random) {
+		var i;
+		var p = new Uint8Array(256);
+		for (i = 0; i < 256; i++) {
+			p[i] = i;
+		}
+		for (i = 0; i < 255; i++) {
+			var r = i + ~~(random() * (256 - i));
+			var aux = p[i];
+			p[i] = p[r];
+			p[r] = aux;
+		}
+		return p;
+	}
+	SimplexNoise._buildPermutationTable = buildPermutationTable;
+
+	function alea() {
+		// Johannes Baagøe <baagoe@baagoe.com>, 2010
+		var s0 = 0;
+		var s1 = 0;
+		var s2 = 0;
+		var c = 1;
+
+		var mash = masher();
+		s0 = mash(" ");
+		s1 = mash(" ");
+		s2 = mash(" ");
+
+		for (var i = 0; i < arguments.length; i++) {
+			s0 -= mash(arguments[i]);
+			if (s0 < 0) {
+				s0 += 1;
+			}
+			s1 -= mash(arguments[i]);
+			if (s1 < 0) {
+				s1 += 1;
+			}
+			s2 -= mash(arguments[i]);
+			if (s2 < 0) {
+				s2 += 1;
+			}
+		}
+		mash = null;
+		return function() {
+			var t = 2091639 * s0 + c * 2.3283064365386963e-10; // 2^-32
+			s0 = s1;
+			s1 = s2;
+			return s2 = t - (c = t | 0);
+		};
+	}
+	function masher() {
+		var n = 0xefc8249d;
+		return function(data) {
+			data = data.toString();
+			for (var i = 0; i < data.length; i++) {
+				n += data.charCodeAt(i);
+				var h = 0.02519603282416938 * n;
+				n = h >>> 0;
+				h -= n;
+				h *= n;
+				n = h >>> 0;
+				h -= n;
+				n += h * 0x100000000; // 2^32
+			}
+			return (n >>> 0) * 2.3283064365386963e-10; // 2^-32
+		};
+	}
+
+	return SimplexNoise;
+
+})();

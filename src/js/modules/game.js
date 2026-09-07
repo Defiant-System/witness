@@ -51,7 +51,7 @@ let Game = {
 			case "mousemove":
 				if (!Game.grid.snake.targetingMouse && event.movementX != undefined) {
 					Game.grid.snake.setMouseDiff(event.movementX, event.movementY);
-					Game.grid.updateSnake();
+					Game.grid.scheduleSnakeUpdate();
 				} else {
 					Game.grid.snake.targetingMouse = false;
 				}

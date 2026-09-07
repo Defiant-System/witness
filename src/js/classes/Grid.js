@@ -129,6 +129,27 @@ class Grid {
 		data.draw.find("circle").cssSequence("started", "animationend", el => this._started = true);
 	}
 
+	scheduleSnakeUpdate() {
+		if (this._snakeRaf) return;
+		let tick = () => {
+			if (!this.snake) {
+				this._snakeRaf = null;
+				return;
+			}
+			let changed = this.snake.filterMouse();
+			if (changed) this.updateSnake();
+			this._snakeRaf = changed ? requestAnimationFrame(tick) : null;
+		};
+		this._snakeRaf = requestAnimationFrame(tick);
+	}
+
+	cancelSnakeUpdate() {
+		if (this._snakeRaf) {
+			cancelAnimationFrame(this._snakeRaf);
+			this._snakeRaf = null;
+		}
+	}
+
 	updateSnake() {
 		if (!this._started) return;
 		let msPerGridUnit = 75;
@@ -137,6 +158,7 @@ class Grid {
 	}
 
 	async finishSnake() {
+		this.cancelSnakeUpdate();
 		let APP = witness,
 			fadeOutSnake = (sequence="fade-out") => {
 				// UI update
